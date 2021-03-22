@@ -1,4 +1,5 @@
 import axios from "axios"
+import { setHttpToken } from "../../../helpers";
 import { result } from "lodash";
 
 export const register = ({dispatch}, {payload, context}) => {
@@ -11,12 +12,19 @@ export const register = ({dispatch}, {payload, context}) => {
         });
 }
 
-export const login = ({}, {payload, context}) => {
+export const login = ({dispatch}, {payload, context}) => {
     return axios
         .post("/api/auth/login", payload)
         .then((result) => {
-            console.log(result);
+            dispatch("setToken", result.data.meta.token).then(() => {
+                console.log(result.data.meta.token);
+            });
         }).catch((err) => {
             context.errors = err.response.data.errors;
         });
+}
+
+export const setToken = ({commit}, {token}) => {
+    commit("setToken", token);
+    setHttpToken(token);
 }

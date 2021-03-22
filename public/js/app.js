@@ -55458,18 +55458,19 @@ __webpack_require__.r(__webpack_exports__);
 /*!************************************************!*\
   !*** ./resources/js/app/auth/store/actions.js ***!
   \************************************************/
-/*! exports provided: register, login */
+/*! exports provided: register, login, setToken */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "register", function() { return register; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "login", function() { return login; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setToken", function() { return setToken; });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_1__);
-function _objectDestructuringEmpty(obj) { if (obj == null) throw new TypeError("Cannot destructure undefined"); }
+/* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../helpers */ "./resources/js/helpers/index.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_2__);
 
 
 
@@ -55484,15 +55485,22 @@ var register = function register(_ref, _ref2) {
   });
 };
 var login = function login(_ref3, _ref4) {
-  _objectDestructuringEmpty(_ref3);
-
+  var dispatch = _ref3.dispatch;
   var payload = _ref4.payload,
       context = _ref4.context;
   return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("/api/auth/login", payload).then(function (result) {
-    console.log(result);
+    dispatch("setToken", result.data.meta.token).then(function () {
+      console.log(result.data.meta.token);
+    });
   })["catch"](function (err) {
     context.errors = err.response.data.errors;
   });
+};
+var setToken = function setToken(_ref5, _ref6) {
+  var commit = _ref5.commit;
+  var token = _ref6.token;
+  commit("setToken", token);
+  Object(_helpers__WEBPACK_IMPORTED_MODULE_1__["setHttpToken"])(token);
 };
 
 /***/ }),
@@ -55524,7 +55532,6 @@ var user = function user(state) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _state__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./state */ "./resources/js/app/auth/store/state.js");
 /* harmony import */ var _mutations__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./mutations */ "./resources/js/app/auth/store/mutations.js");
-/* harmony import */ var _mutations__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_mutations__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _actions__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./actions */ "./resources/js/app/auth/store/actions.js");
 /* harmony import */ var _getters__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./getters */ "./resources/js/app/auth/store/getters.js");
 
@@ -55545,10 +55552,23 @@ __webpack_require__.r(__webpack_exports__);
 /*!**************************************************!*\
   !*** ./resources/js/app/auth/store/mutations.js ***!
   \**************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/*! exports provided: setToken */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setToken", function() { return setToken; });
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_0__);
 
+var setToken = function setToken(state, token) {
+  if (Object(lodash__WEBPACK_IMPORTED_MODULE_0__["isEmpty"])(token)) {
+    localStorage.removeItem('access_token');
+    return;
+  }
+
+  localStoreage.setToken('access_token', token);
+};
 
 /***/ }),
 
@@ -55843,6 +55863,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Navigation_vue_vue_type_template_id_d456e682___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
+
+/***/ }),
+
+/***/ "./resources/js/helpers/index.js":
+/*!***************************************!*\
+  !*** ./resources/js/helpers/index.js ***!
+  \***************************************/
+/*! exports provided: setHttpToken */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setHttpToken", function() { return setHttpToken; });
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_0__);
+
+var setHttpToken = function setHttpToken(token) {
+  if (Object(lodash__WEBPACK_IMPORTED_MODULE_0__["isEmpty"])(token)) {
+    window.axios["default"].headers.common["Authorization"] = null;
+  }
+
+  window.axios["default"].headers.common["Authorization"] = "Bearer" + token;
+};
 
 /***/ }),
 
