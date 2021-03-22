@@ -18,7 +18,10 @@ class LoginController extends Controller
 
         if (! Auth::attempt($user)) {
             return response()->json([
-                'message' => 'Authentication is Invalid'
+                'message' => 'Authentication is Invalid',
+                'errors' => [
+                    'root' => 'Could not sign in with those details.'
+                ]
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
