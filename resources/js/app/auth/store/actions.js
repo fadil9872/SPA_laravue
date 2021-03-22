@@ -1,11 +1,11 @@
 import axios from "axios"
 
-export const register = ({dispatch}, {payload}) => {
+export const register = ({dispatch}, {payload, context}) => {
     return axios
         .post("/api/auth/register", payload)
         .then((resault) => {
             console.log(resault.data);
         }).catch((err) => {
-            console.log(err.response.data.errors);
+            context.errors = err.response.data.errors;
         });
 }
