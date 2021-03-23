@@ -117,7 +117,7 @@ export default {
                 },
                 context: this
             }).then((result) => {
-              this.$router.replace(({ name: "home"}));
+              this.$router.replace({ name: "home"});
             });
         }
     }

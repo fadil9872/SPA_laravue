@@ -55496,6 +55496,7 @@ var login = function login(_ref3, _ref4) {
   var dispatch = _ref3.dispatch;
   var payload = _ref4.payload,
       context = _ref4.context;
+  console.log(payload);
   return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("/api/auth/login", payload).then(function (result) {
     dispatch("setToken", result.data.meta.token).then(function () {
       dispatch('fetchUser', result.data.data);
@@ -55901,10 +55902,10 @@ __webpack_require__.r(__webpack_exports__);
 
 var setHttpToken = function setHttpToken(token) {
   if (Object(lodash__WEBPACK_IMPORTED_MODULE_0__["isEmpty"])(token)) {
-    window.axios["default"].headers.common["Authorization"] = null;
+    window.axios.defaults.headers.common["Authorization"] = null;
   }
 
-  window.axios["default"].headers.common["Authorization"] = "Bearer" + token;
+  window.axios.defaults.headers.common["Authorization"] = "Bearer" + token;
 };
 
 /***/ }),

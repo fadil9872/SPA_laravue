@@ -15,14 +15,14 @@ export const register = ({dispatch}, {payload, context}) => {
 }
 
 export const login = ({dispatch}, {payload, context}) => {
+    console.log(payload);
     return axios
         .post("/api/auth/login", payload)
         .then((result) => {
             dispatch("setToken", result.data.meta.token).then(() => {
                 dispatch('fetchUser', result.data.data);
-                
             });
-        }).catch(err => {
+        }).catch((err) => {
             context.errors = err.response.data.errors;
         });
 }
