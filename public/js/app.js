@@ -55246,6 +55246,14 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
 window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
+_store__WEBPACK_IMPORTED_MODULE_1__["default"].dispatch("auth/setToken").then(function () {
+  _store__WEBPACK_IMPORTED_MODULE_1__["default"].dispatch("auth/fetchUser")["catch"](function () {
+    _store__WEBPACK_IMPORTED_MODULE_1__["default"].dispatch("auth/removeToken");
+    _router__WEBPACK_IMPORTED_MODULE_0__["default"].replace({
+      name: "login"
+    });
+  });
+})["catch"](function (err) {});
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
@@ -55463,7 +55471,7 @@ __webpack_require__.r(__webpack_exports__);
 /*!************************************************!*\
   !*** ./resources/js/app/auth/store/actions.js ***!
   \************************************************/
-/*! exports provided: register, login, setToken, fetchUser */
+/*! exports provided: register, login, setToken, removeToken, fetchUser, checkTokenExists */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -55471,12 +55479,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "register", function() { return register; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "login", function() { return login; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setToken", function() { return setToken; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "removeToken", function() { return removeToken; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchUser", function() { return fetchUser; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "checkTokenExists", function() { return checkTokenExists; });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../helpers */ "./resources/js/helpers/index.js");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../helpers */ "./resources/js/helpers/index.js");
+
 
 
 
@@ -55485,6 +55496,7 @@ var register = function register(_ref, _ref2) {
   var payload = _ref2.payload,
       context = _ref2.context;
   return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("/api/auth/register", payload).then(function (result) {
+    console.log(result);
     dispatch("setToken", result.data.meta.token).then(function () {
       dispatch('fetchUser', result.data.data);
     });
@@ -55498,22 +55510,66 @@ var login = function login(_ref3, _ref4) {
       context = _ref4.context;
   console.log(payload);
   return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("/api/auth/login", payload).then(function (result) {
-    dispatch("setToken", result.data.meta.token).then(function () {
-      dispatch('fetchUser', result.data.data);
-    });
+    try {
+      dispatch("setToken", result.data.meta.token).then(function () {
+        dispatch('fetchUser', {
+          user: result.data.data,
+          token: result.data.meta.token
+        });
+      });
+    } catch (err) {
+      console.trace(err);
+    }
   })["catch"](function (err) {
     context.errors = err.response.data.errors;
   });
 };
 var setToken = function setToken(_ref5, token) {
-  var commit = _ref5.commit;
+  var commit = _ref5.commit,
+      dispatch = _ref5.dispatch;
+  console.log(token);
+
+  if (lodash__WEBPACK_IMPORTED_MODULE_1___default()(token)) {
+    return dispatch("checkTokenExists").then(function (token) {
+      Object(_helpers__WEBPACK_IMPORTED_MODULE_2__["setHttpToken"])(token);
+    }, function (err) {
+      return console.trace(err);
+    });
+  }
+
   commit("setToken", token);
-  Object(_helpers__WEBPACK_IMPORTED_MODULE_1__["setHttpToken"])(token);
+  Object(_helpers__WEBPACK_IMPORTED_MODULE_2__["setHttpToken"])(token);
 };
-var fetchUser = function fetchUser(_ref6, user) {
+var removeToken = function removeToken(_ref6) {
   var commit = _ref6.commit;
-  commit("setAuthenticated", true);
-  commit("setUserData", user);
+  commit("setAuthenticated", false);
+  commit("setUserData", null);
+  commit("setToken", null);
+  Object(_helpers__WEBPACK_IMPORTED_MODULE_2__["setHttpToken"])(null);
+};
+var fetchUser = function fetchUser(_ref7, payload) {
+  var commit = _ref7.commit;
+  console.log("token", payload);
+  axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("/api/user", {
+    headers: {
+      "Authorization": "Bearer " + payload.token
+    }
+  }).then(function (result) {
+    console.log(result);
+    commit("setAuthenticated", true);
+    commit("setUserData", result);
+  })["catch"](function (err) {
+    console.log(err.response.data);
+  });
+};
+var checkTokenExists = function checkTokenExists() {
+  var token = localStorage.getItem('access_token');
+
+  if (lodash__WEBPACK_IMPORTED_MODULE_1___default()(token)) {
+    return Promise.reject("NO_STORAGE_FOUND");
+  }
+
+  return Promise.resolve('token');
 };
 
 /***/ }),
